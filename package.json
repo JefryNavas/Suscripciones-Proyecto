@@ -1,0 +1,18 @@
+{
+  "name": "proyecto-p1",
+  "version": "1.0.0",
+  "description": "Suscripciones a telefonía celular móvil",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Jefry Navas",
+  "license": "ISC",
+  "dependencies": {
+    "colors": "^1.4.0",
+    "yargs": "^17.0.1"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.7"
+  }
+}
