@@ -4,19 +4,18 @@ const file = {
     desc: "Permite establecer el path del archivo CSV que contiene los datos a analizar"
 }
 const country = {
-    demand: true,
+    default: 'ABW',
     alias: "c",
     desc: " Permite determinar el país a analizar a través de su código"
 }
 
 const year = {
-    demand: true,
+
     alias: "y",
     desc: "Permite especificar el año para el cual se requiere las estadísticas. Por defecto, 2018.",
     default: 2018
 }
 const out = {
-    demand: true,
     alias: "o",
     desc: " Establece el nombre del archivo donde se almacenará los resultados."
 
