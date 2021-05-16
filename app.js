@@ -1,13 +1,10 @@
 const { argv } = require("./config/yargs");
 const colors = require("colors")
-const { leerDatos } = require("./controlador/leer")
-const { html5 } = require("./servidor/servidor")
+const { leerDatos, resultado } = require("./controlador/leer")
+
 let comando = argv._[0];
 
 const http = require('http');
-
-const hostname = '127.0.0.1';
-const port = 3000;
 
 
 

@@ -1,6 +1,8 @@
 const csv = require('csv-parser');
 const fs = require('fs');
 let datosCSV = [];
+const http = require('http');
+let resultado = [];
 
 const leerDatos = (path, cod, year) => {
     let n = 0;
@@ -18,12 +20,9 @@ const leerDatos = (path, cod, year) => {
         })
         .on('end', () => {
             arreglar(cod, year);
-
+            imprimir(cod, year);
         });
-
-
 }
-
 const arreglar = (cod, year) => {
     var arreglado = datosCSV.map(item => {
         return {
@@ -96,10 +95,12 @@ const arreglar = (cod, year) => {
         };
     });
     calcularMedia(arreglado, cod, year);
-    topCinco(arreglado, year);
+    let top = topCinco(arreglado, year);
+    resultado.push(top);
 }
 
 const calcularMedia = (datos, cod, year) => {
+
     len = datos.length;
     let cont = 0;
     for (let i = 0; i < datos.length; i++) {
@@ -109,7 +110,11 @@ const calcularMedia = (datos, cod, year) => {
         }
     }
     media = cont / len;
-    valorSPais(datos, media.toFixed(2), cod);
+    mediaR = media.toFixed(2);
+
+    resultado.push(mediaR);
+    valorSPais(datos, mediaR, cod);
+
 }
 const valorSPais = (datos, media, cod) => {
     let suma = 0;
@@ -120,11 +125,12 @@ const valorSPais = (datos, media, cod) => {
             };
         }
     }
-    if (suma > media) {
+    /* if (suma > media) {
         console.log(`el valor de las suscripciones del país ${cod} si es mayor a la media mundial ${suma}`);
     } else {
         console.log(`La media mundial ${media} es mayor a las suscripciones del país ${suma}`);
-    }
+    } */
+
     sumaPaises(datos, suma);
 }
 
@@ -135,6 +141,7 @@ const sumaPaises = (datos, sumaP) => {
     for (const i in datos) {
         for (var key in datos[i].year) {
             //sumando todos los años de cada pais
+
             suma += Number(datos[i].year[key]);
         };
         nombre = datos[i].nombre_ciudad;
@@ -142,8 +149,11 @@ const sumaPaises = (datos, sumaP) => {
         vec.push({ nombre, suma });
         suma = 0;
     }
-    porEncima(vec, sumaP);
-    porDebajo(vec, sumaP);
+    let porE = porEncima(vec, sumaP);
+    let porD = porDebajo(vec, sumaP);
+    resultado.push(porE);
+    resultado.push(porD);
+
 }
 
 const porEncima = (vec, sumaP) => {
@@ -164,10 +174,11 @@ const porEncima = (vec, sumaP) => {
         }
     }
     //Impresión de los 5 paises
-    /* console.log("5 Países por encima del Pais");
+    let result = [];
     for (let i = 0; i < 5; i++) {
-        console.log(porE[i]);
-    } */
+        result.push(porE[i]);
+    }
+    return result;
 }
 const porDebajo = (vec, sumaP) => {
     // Ordenación del array para obtener los 5 paises por debajo
@@ -187,11 +198,11 @@ const porDebajo = (vec, sumaP) => {
         }
     }
     //Impresión de los 5 paises
-    /*  console.log("5 Países por debajo del Pais");
+    let result = []
     for (let i = 0; i < 5; i++) {
-        console.log(porE[i]);
-    } */
-
+        result.push(porE[i]);
+    }
+    return result;
 }
 const topCinco = (datos, year) => {
     let vec = [];
@@ -214,12 +225,65 @@ const topCinco = (datos, year) => {
     });
 
     //Obteniendo el top 5 de paises por el año especificado
-    /* console.log("Top 5 del año especificado");
+    let result = []
     for (let i = 0; i < 5; i++) {
-        console.log(vec[i]);
-    } */
+        result.push(vec[i]);
+    }
+
+    return result;
+
+}
+let imprimir = (cod, year) => {
+    const hostname = '127.0.0.1';
+    const port = 3000;
+    top = resultado[3];
+    top5 = [];
+    for (const i in top) {
+        top5.push(`<tr><td>${top[i].nombre}</td><td>${top[i].dato}</td></tr>`);
+    }
+    const server = http.createServer((req, res) => {
+        res.statusCode = 200;
+        res.setHeader('Content-Type', 'text/html');
+        res.end(`<!DOCTYPE html>
+        <html>
+        
+        <head>
+            <meta charset='utf-8'>
+            <meta http-equiv='X-UA-Compatible' content='IE=edge'>
+            <title>Proyecto</title>
+            <meta name='viewport' content='width=device-width, initial-scale=1'>
+            <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-+0n0xVW2eSR5OomGNYDnhzAbDsOXxcvSN1TPprVMTNDbiYZCxYbOOl7+AMvyTG2x" crossorigin="anonymous">
+        
+        </head>
+        <body>
+            <div class="container">
+                <h1 class="display-4">Top 5 países del año ${year}</h1>
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th scope="col">Páis</th>
+                            <th scope="col">Suscripciones de telefonía celular movíl</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${top5}
+                    </tbody>
+                </table>
+            </div>
+        
+        </body>
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.1/dist/js/bootstrap.bundle.min.js" integrity="sha384-gtEjrD/SeCtmISkJkNUaaKMoLD0//ElJ19smozuHV6z3Iehds+3Ulb9Bn9Plx0x4" crossorigin="anonymous"></script>
+        
+        </html>`);
+    });
+
+    server.listen(port, hostname, () => {
+        console.log(`Server running at http://${hostname}:${port}/`);
+    });
+
 
 }
 
 
-module.exports = { leerDatos }
+
+module.exports = { leerDatos, resultado }
