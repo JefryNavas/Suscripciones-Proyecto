@@ -15,6 +15,7 @@ const year = {
     default: 2018
 }
 const out = {
+    demand: true,
     alias: "o",
     desc: " Establece el nombre del archivo donde se almacenará los resultados."
 

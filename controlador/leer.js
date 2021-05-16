@@ -1,27 +1,48 @@
 const csv = require('csv-parser');
 const fs = require('fs');
-let datosCSV = [];
 const http = require('http');
+const colors = require("colors")
+let datosCSV = [];
 let resultado = [];
 
-const leerDatos = (path, cod, year) => {
+const leerDatos = (path, cod, year, guardar) => {
     let n = 0;
+    let pais;
+    let data;
     fs.createReadStream(path)
         .pipe(csv({ headers: false }))
         .on('data', (row) => {
-
             if (n > 4) {
                 datosCSV.push(row);
             } else {
                 delete row;
                 n++;
             }
-
         })
         .on('end', () => {
-            let data = arreglar(cod, year);
-            imprimir(data, cod, year);
+            pais = datosCSV.find(obj => obj[1] === cod);
 
+            if (year > 2019 || year < 1960) {
+                console.log("EL año es incorrecto".red);
+                return 1;
+            }
+            if (pais) {
+                data = arreglar(cod, year);
+            } else {
+                console.log("El codigo del país no existe".red);
+                return 1;
+            }
+            if (guardar === 1) {
+                imprimirPorCon(data, cod, year);
+                imprimirPorWeb(data, cod, year);
+                guardar = 0;
+            }
+            if (guardar === undefined || guardar === true) {
+                console.log("Nombre del arhivo no es correcto".red);
+            } else if (guardar != 0) {
+                guardarDatos(guardar);
+                console.log("Datos guardados correctamente".green);
+            }
         });
 }
 const arreglar = (cod, year) => {
@@ -103,23 +124,17 @@ const arreglar = (cod, year) => {
                 arreglado.push(arr[i]);
             }
         }
-
     }
-
-
     calcularMedia(arreglado, cod, year);
     let top = topCinco(arreglado, year);
-    resultado.push(top);
+    resultado.push({ top5: top });
     return arreglado;
 }
-
 const calcularMedia = (datos, cod, year) => {
     let cont = 0;
     let len = 0;
     for (let i = 0; i < datos.length; i++) {
-
         datoy = Number(datos[i].year[year]);
-
         if (datoy && datoy != 0) {
             cont += datoy;
             len++;
@@ -127,10 +142,9 @@ const calcularMedia = (datos, cod, year) => {
     }
     media = cont / len;
     mediaR = media.toFixed(2);
-
-    resultado.push(mediaR);
+    resultado.push({ mediaMundial: mediaR });
     let result = valorSPais(datos, mediaR, cod, year);
-    resultado.push(result);
+    resultado.push({ MayorOMenor: result });
 
 }
 const valorSPais = (datos, media, cod, year) => {
@@ -139,14 +153,9 @@ const valorSPais = (datos, media, cod, year) => {
     let datoPais = pais.year[year];
 
 
-    /* if (suma > media) {
-        console.log(`el valor de las suscripciones del país ${cod} si es mayor a la media mundial ${suma}`);
-    } else {
-        console.log(`La media mundial ${media} es mayor a las suscripciones del país ${suma}`);
-    } */
     datoPaises(datos, datoPais, year);
     if (datoPais > media) {
-        return `El valor de las suscripciones del país ${cod} -${pais.nombre_ciudad} con: ${datoPais} en el año ${year}
+        return `El valor de las suscripciones del país ${cod} - ${pais.nombre_ciudad} con: ${datoPais} en el año ${year}
                 si es mayor a la media mundial`;
     } else {
         return `La media mundial en el año ${year} es mayor a las suscripciones del país ${pais.nombre_ciudad}: ${datoPais}`;
@@ -166,8 +175,8 @@ const datoPaises = (datos, sumaP, year) => {
 
     let porE = porEncima(vec, sumaP);
     let porD = porDebajo(vec, sumaP);
-    resultado.push(porE);
-    resultado.push(porD);
+    resultado.push({ PorEncima: porE });
+    resultado.push({ PorDebajo: porD });
 
 }
 
@@ -249,17 +258,67 @@ const topCinco = (datos, year) => {
     return result;
 
 }
-let imprimir = (datos, cod, year) => {
+const guardarDatos = (out) => {
+    let data = JSON.stringify(resultado);
+    let name = `./data/${out}.json`;
+    fs.writeFile(name, data, (err) => {
+        if (err) {
+            console.log("Error al guardar el archivo", err);
+        }
+    })
+    return true;
+}
+
+const imprimirPorCon = (datos, cod, year) => {
+    let pais = datos.find(obj => obj.codigo_ciudad === cod);
+    MoM = resultado[3].MayorOMenor;
+    me = resultado[0].mediaMundial;
+    top = resultado[4].top5;
+    porD = resultado[2].PorDebajo;
+    porE = resultado[1].PorEncima;
+    console.log("===============================================".magenta);
+    console.log("=========IMPRIMIENDO DATOS POR CONSOLA=========".magenta);
+    console.log("===============================================".magenta);
+    console.log();
+    console.log("****SUSCRIPCIONES DE TELEFONÍA CELULAR MOVÍL****".green);
+    console.log("-------------------------------------------------------------------------".magenta);
+    console.log(`La media de suscripciones de todos los países en el año ${year} es: ${me}`.yellow);
+    console.log("-------------------------------------------------------------------------".magenta);
+    console.log(MoM.yellow);
+    console.log("=========================================================================".magenta);
+    console.log(`Países por Encima del país ${cod} - ${pais.nombre_ciudad}, Año ${year}`.bgWhite.black);
+    for (const key in porE) {
+        console.log(`País: ${porE[key].nombre.green}`);
+        console.log(`Suscripciones: ${porE[key].suma}`.yellow);
+        console.log("");
+    }
+    console.log("======================================================================".magenta);
+    console.log(`Países por Debajo del país ${cod} - ${pais.nombre_ciudad}, Año ${year}`.bgWhite.black);
+    for (const key in porD) {
+        console.log(`País: ${porD[key].nombre.green}`);
+        console.log(`Suscripciones: ${porD[key].suma}`.yellow);
+        console.log("");
+    }
+    console.log("======================================================================".magenta);
+    console.log(`Top 5 países del año ${year}`.bgGreen.black);
+    for (const key in top) {
+        console.log(`País: ${top[key].nombre.green}`);
+        console.log(`Suscripciones: ${top[key].dato}`.yellow);
+        console.log("");
+    }
+}
+
+const imprimirPorWeb = (datos, cod, year) => {
     let pais = datos.find(obj => obj.codigo_ciudad === cod);
 
     const hostname = '127.0.0.1';
     const port = 3000;
 
-    MoM = resultado[3];
-    me = resultado[0];
-    top = resultado[4];
-    porD = resultado[2];
-    porE = resultado[1];
+    MoM = resultado[3].MayorOMenor;
+    me = resultado[0].mediaMundial;
+    top = resultado[4].top5;
+    porD = resultado[2].PorDebajo;
+    porE = resultado[1].PorEncima;
 
 
     top5 = [];
@@ -360,7 +419,7 @@ let imprimir = (datos, cod, year) => {
     });
 
     server.listen(port, hostname, () => {
-        console.log(`Server running at http://${hostname}:${port}/`);
+        console.log(`Servidor corriendo en http://${hostname}:${port}/`.green);
     });
 
 
@@ -368,4 +427,4 @@ let imprimir = (datos, cod, year) => {
 
 
 
-module.exports = { leerDatos }
+module.exports = { leerDatos, guardarDatos }
