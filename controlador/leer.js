@@ -19,12 +19,13 @@ const leerDatos = (path, cod, year) => {
 
         })
         .on('end', () => {
-            arreglar(cod, year);
-            imprimir(cod, year);
+            let data = arreglar(cod, year);
+            imprimir(data, cod, year);
+
         });
 }
 const arreglar = (cod, year) => {
-    var arreglado = datosCSV.map(item => {
+    var arr = datosCSV.map(item => {
         return {
             nombre_ciudad: item[0],
             codigo_ciudad: item[1],
@@ -94,61 +95,75 @@ const arreglar = (cod, year) => {
 
         };
     });
+    let countryC = require("../datos/ISO-3166-ALPHA-3.json");
+    let arreglado = [];
+    for (const i in arr) {
+        for (const key in countryC) {
+            if (arr[i].codigo_ciudad === countryC[key].countryCode) {
+                arreglado.push(arr[i]);
+            }
+        }
+
+    }
+
+
     calcularMedia(arreglado, cod, year);
     let top = topCinco(arreglado, year);
     resultado.push(top);
+    return arreglado;
 }
 
 const calcularMedia = (datos, cod, year) => {
-
-    len = datos.length;
     let cont = 0;
+    let len = 0;
     for (let i = 0; i < datos.length; i++) {
+
         datoy = Number(datos[i].year[year]);
-        if (datoy) {
-            cont = cont + datoy;
+
+        if (datoy && datoy != 0) {
+            cont += datoy;
+            len++;
         }
     }
     media = cont / len;
     mediaR = media.toFixed(2);
 
     resultado.push(mediaR);
-    valorSPais(datos, mediaR, cod);
+    let result = valorSPais(datos, mediaR, cod, year);
+    resultado.push(result);
 
 }
-const valorSPais = (datos, media, cod) => {
-    let suma = 0;
-    for (const i in datos) {
-        if (datos[i].codigo_ciudad == cod) {
-            for (var key in datos[i].year) {
-                suma += Number(datos[i].year[key]);
-            };
-        }
-    }
+const valorSPais = (datos, media, cod, year) => {
+    let pais = datos.find(obj => obj.codigo_ciudad === cod);
+
+    let datoPais = pais.year[year];
+
+
     /* if (suma > media) {
         console.log(`el valor de las suscripciones del país ${cod} si es mayor a la media mundial ${suma}`);
     } else {
         console.log(`La media mundial ${media} es mayor a las suscripciones del país ${suma}`);
     } */
+    datoPaises(datos, datoPais, year);
+    if (datoPais > media) {
+        return `El valor de las suscripciones del país ${cod} -${pais.nombre_ciudad} con: ${datoPais} en el año ${year}
+                si es mayor a la media mundial`;
+    } else {
+        return `La media mundial en el año ${year} es mayor a las suscripciones del país ${pais.nombre_ciudad}: ${datoPais}`;
+    }
 
-    sumaPaises(datos, suma);
 }
 
-// Suma de todos los años de cada pais del csv
-const sumaPaises = (datos, sumaP) => {
-    let suma = 0;
+const datoPaises = (datos, sumaP, year) => {
     let vec = [];
     for (const i in datos) {
-        for (var key in datos[i].year) {
-            //sumando todos los años de cada pais
-
-            suma += Number(datos[i].year[key]);
-        };
-        nombre = datos[i].nombre_ciudad;
-        //Guardando en un vector el nombre del pais con la suma de los años
-        vec.push({ nombre, suma });
-        suma = 0;
+        if (datos[i].year[year] && datos[i].year[year] != 0) {
+            nombre = datos[i].nombre_ciudad;
+            suma = Number(datos[i].year[year]);
+            vec.push({ nombre, suma });
+        }
     }
+
     let porE = porEncima(vec, sumaP);
     let porD = porDebajo(vec, sumaP);
     resultado.push(porE);
@@ -230,17 +245,38 @@ const topCinco = (datos, year) => {
         result.push(vec[i]);
     }
 
+
     return result;
 
 }
-let imprimir = (cod, year) => {
+let imprimir = (datos, cod, year) => {
+    let pais = datos.find(obj => obj.codigo_ciudad === cod);
+
     const hostname = '127.0.0.1';
     const port = 3000;
-    top = resultado[3];
+
+    MoM = resultado[3];
+    me = resultado[0];
+    top = resultado[4];
+    porD = resultado[2];
+    porE = resultado[1];
+
+
     top5 = [];
+    porEn = [];
+    porDe = [];
+
     for (const i in top) {
         top5.push(`<tr><td>${top[i].nombre}</td><td>${top[i].dato}</td></tr>`);
     }
+    for (const i in porD) {
+        porDe.push(`<tr><td>${porD[i].nombre}</td><td>${porD[i].suma}</td></tr>`);
+    }
+    for (const i in porE) {
+        porEn.push(`<tr><td>${porE[i].nombre}</td><td>${porE[i].suma}</td></tr>`);
+    }
+
+
     const server = http.createServer((req, res) => {
         res.statusCode = 200;
         res.setHeader('Content-Type', 'text/html');
@@ -255,20 +291,66 @@ let imprimir = (cod, year) => {
             <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-+0n0xVW2eSR5OomGNYDnhzAbDsOXxcvSN1TPprVMTNDbiYZCxYbOOl7+AMvyTG2x" crossorigin="anonymous">
         
         </head>
-        <body>
+        
+        <body class="bg-dark text-white">
+        
             <div class="container">
-                <h1 class="display-4">Top 5 países del año ${year}</h1>
-                <table class="table table-hover">
-                    <thead>
-                        <tr>
-                            <th scope="col">Páis</th>
-                            <th scope="col">Suscripciones de telefonía celular movíl</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        ${top5}
-                    </tbody>
-                </table>
+            <h1 class="display-4 pb-5">Suscripciones de telefonía celular movíl</h1>
+                <h5 class="pb-3">La media de suscripciones de todos los países en el año ${year} es: ${me}</h5>
+            </div>
+            <div class="container pb-5">
+                <h5>${MoM}</h5>
+            </div>
+            <hr class="mt-2 mb-3"/>
+            <div class="container">
+                <div class="row">
+                    <div class="col-6">
+                        <h1 class="display-6">Países por Encima del país ${cod} - ${pais.nombre_ciudad}, Año ${year}</h1>
+                        <table class="table table-hover bg-secondary">
+                            <thead class="text-center">
+                                <tr>
+                                    <th scope="col">País</th>
+                                    <th scope="col">Suscripciones de telefonía celular movíl</th>
+                                </tr>
+                            </thead>
+                            <tbody class="text-white text-center">
+                                ${porEn}
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <div class="col-6">
+                        <h1 class="display-6">Países por Debajo del país ${cod} - ${pais.nombre_ciudad}, , Año ${year}</h1>
+                        <table class="table table-hover bg-secondary">
+                            <thead class="text-center">
+                                <tr>
+                                    <th scope="col">País</th>
+                                    <th scope="col">Suscripciones de telefonía celular movíl</th>
+                                </tr>
+                            </thead>
+                            <tbody class="text-white text-center">
+                                ${porDe}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <hr class="mt-2 mb-3"/>
+            <div class="container justify-content-center">
+                <h1 class="display-5">Top 5 países del año ${year}</h1>
+                <div class="col-8">
+                    <table class="table table-hover bg-success">
+                        <thead class="text-center">
+                            <tr>
+                                <th scope="col">País</th>
+                                <th scope="col">Suscripciones de telefonía celular movíl</th>
+                            </tr>
+                        </thead>
+                        <tbody class="text-white text-center">
+                            ${top5}
+                        </tbody>
+                    </table>
+                </div>
             </div>
         
         </body>
@@ -286,4 +368,4 @@ let imprimir = (cod, year) => {
 
 
 
-module.exports = { leerDatos, resultado }
+module.exports = { leerDatos }

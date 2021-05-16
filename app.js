@@ -1,6 +1,6 @@
 const { argv } = require("./config/yargs");
 const colors = require("colors")
-const { leerDatos, resultado } = require("./controlador/leer")
+const { leerDatos } = require("./controlador/leer")
 
 let comando = argv._[0];
 
