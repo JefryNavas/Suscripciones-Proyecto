@@ -4,7 +4,6 @@ const http = require('http');
 const colors = require("colors")
 let datosCSV = [];
 let resultado = [];
-
 const leerDatos = (path, cod, year, guardar) => {
     let n = 0;
     let pais;
@@ -142,7 +141,12 @@ const calcularMedia = (datos, cod, year) => {
     }
     media = cont / len;
     mediaR = media.toFixed(2);
-    resultado.push({ mediaMundial: mediaR });
+    if (mediaR > 0) {
+        resultado.push({ mediaMundial: mediaR });
+    } else {
+        resultado.push({ mediaMundial: "Sin dato" });
+    }
+
     let result = valorSPais(datos, mediaR, cod, year);
     resultado.push({ MayorOMenor: result });
 
@@ -151,7 +155,6 @@ const valorSPais = (datos, media, cod, year) => {
     let pais = datos.find(obj => obj.codigo_ciudad === cod);
 
     let datoPais = pais.year[year];
-
 
     datoPaises(datos, datoPais, year);
     if (datoPais > media) {
@@ -197,6 +200,9 @@ const porEncima = (vec, sumaP) => {
             porE.push(vec[key]);
         }
     }
+    if (porE < 1) {
+        return false;
+    }
     //Impresión de los 5 paises
     let result = [];
     for (let i = 0; i < 5; i++) {
@@ -220,6 +226,9 @@ const porDebajo = (vec, sumaP) => {
         if (vec[key].suma < sumaP) {
             porE.push(vec[key]);
         }
+    }
+    if (porE < 1) {
+        return false;
     }
     //Impresión de los 5 paises
     let result = []
@@ -287,25 +296,40 @@ const imprimirPorCon = (datos, cod, year) => {
     console.log(MoM.yellow);
     console.log("=========================================================================".magenta);
     console.log(`Países por Encima del país ${cod} - ${pais.nombre_ciudad}, Año ${year}`.bgWhite.black);
-    for (const key in porE) {
-        console.log(`País: ${porE[key].nombre.green}`);
-        console.log(`Suscripciones: ${porE[key].suma}`.yellow);
-        console.log("");
+
+    if (porE == false) {
+        console.log("No hay datos".red);
+    } else {
+        for (const key in porE) {
+            console.log(`País: ${porE[key].nombre.green}`);
+            console.log(`Suscripciones: ${porE[key].suma}`.yellow);
+            console.log("");
+        }
     }
     console.log("======================================================================".magenta);
     console.log(`Países por Debajo del país ${cod} - ${pais.nombre_ciudad}, Año ${year}`.bgWhite.black);
-    for (const key in porD) {
-        console.log(`País: ${porD[key].nombre.green}`);
-        console.log(`Suscripciones: ${porD[key].suma}`.yellow);
-        console.log("");
+    if (porD == false) {
+        console.log("No hay datos".red);
+    } else {
+        for (const key in porD) {
+            console.log(`País: ${porD[key].nombre.green}`);
+            console.log(`Suscripciones: ${porD[key].suma}`.yellow);
+            console.log("");
+        }
     }
+
     console.log("======================================================================".magenta);
     console.log(`Top 5 países del año ${year}`.bgGreen.black);
-    for (const key in top) {
-        console.log(`País: ${top[key].nombre.green}`);
-        console.log(`Suscripciones: ${top[key].dato}`.yellow);
-        console.log("");
+    if (top[0].dato == 0) {
+        console.log("No hay datos".red);
+    } else {
+        for (const key in top) {
+            console.log(`País: ${top[key].nombre.green}`);
+            console.log(`Suscripciones: ${top[key].dato}`.yellow);
+            console.log("");
+        }
     }
+
 }
 
 const imprimirPorWeb = (datos, cod, year) => {
@@ -320,19 +344,30 @@ const imprimirPorWeb = (datos, cod, year) => {
     porD = resultado[2].PorDebajo;
     porE = resultado[1].PorEncima;
 
-
     top5 = [];
     porEn = [];
     porDe = [];
 
-    for (const i in top) {
-        top5.push(`<tr><td>${top[i].nombre}</td><td>${top[i].dato}</td></tr>`);
+    if (porE == false) {
+        porEn.push(`<tr><td>Sin dato</td><td>Sin dato</td></tr>`);
+    } else {
+        for (const i in porE) {
+            porEn.push(`<tr><td>${porE[i].nombre}</td><td>${porE[i].suma}</td></tr>`);
+        }
     }
-    for (const i in porD) {
-        porDe.push(`<tr><td>${porD[i].nombre}</td><td>${porD[i].suma}</td></tr>`);
+    if (top[0].dato == 0) {
+        top5.push(`<tr><td>Sin dato</td><td>Sin dato</td></tr>`);
+    } else {
+        for (const i in top) {
+            top5.push(`<tr><td>${top[i].nombre}</td><td>${top[i].dato}</td></tr>`);
+        }
     }
-    for (const i in porE) {
-        porEn.push(`<tr><td>${porE[i].nombre}</td><td>${porE[i].suma}</td></tr>`);
+    if (porD == false) {
+        porDe.push(`<tr><td>Sin dato</td><td>Sin dato</td></tr>`);
+    } else {
+        for (const i in porD) {
+            porDe.push(`<tr><td>${porD[i].nombre}</td><td>${porD[i].suma}</td></tr>`);
+        }
     }
 
 
@@ -341,7 +376,6 @@ const imprimirPorWeb = (datos, cod, year) => {
         res.setHeader('Content-Type', 'text/html');
         res.end(`<!DOCTYPE html>
         <html>
-        
         <head>
             <meta charset='utf-8'>
             <meta http-equiv='X-UA-Compatible' content='IE=edge'>
@@ -427,4 +461,4 @@ const imprimirPorWeb = (datos, cod, year) => {
 
 
 
-module.exports = { leerDatos, guardarDatos }
+module.exports = { leerDatos }
