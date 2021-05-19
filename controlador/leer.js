@@ -301,9 +301,14 @@ const imprimirPorCon = (datos, cod, year) => {
         console.log("No hay datos".red);
     } else {
         for (const key in porE) {
-            console.log(`País: ${porE[key].nombre.green}`);
-            console.log(`Suscripciones: ${porE[key].suma}`.yellow);
-            console.log("");
+            if (porE[key] == undefined || porE[key].suma == 0) {
+
+            } else {
+                console.log(`País: ${porE[key].nombre.green}`);
+                console.log(`Suscripciones: ${porE[key].suma}`.yellow);
+                console.log("");
+            }
+
         }
     }
     console.log("======================================================================".magenta);
@@ -312,9 +317,14 @@ const imprimirPorCon = (datos, cod, year) => {
         console.log("No hay datos".red);
     } else {
         for (const key in porD) {
-            console.log(`País: ${porD[key].nombre.green}`);
-            console.log(`Suscripciones: ${porD[key].suma}`.yellow);
-            console.log("");
+            if (porD[key] == undefined || porD[key].suma == 0) {
+
+            } else {
+                console.log(`País: ${porD[key].nombre.green}`);
+                console.log(`Suscripciones: ${porD[key].suma}`.yellow);
+                console.log("");
+            }
+
         }
     }
 
@@ -324,9 +334,14 @@ const imprimirPorCon = (datos, cod, year) => {
         console.log("No hay datos".red);
     } else {
         for (const key in top) {
-            console.log(`País: ${top[key].nombre.green}`);
-            console.log(`Suscripciones: ${top[key].dato}`.yellow);
-            console.log("");
+            if (top[key] == undefined || top[key].dato == 0) {
+
+            } else {
+                console.log(`País: ${top[key].nombre.green}`);
+                console.log(`Suscripciones: ${top[key].dato}`.yellow);
+                console.log("");
+            }
+
         }
     }
 
@@ -352,21 +367,30 @@ const imprimirPorWeb = (datos, cod, year) => {
         porEn.push(`<tr><td>Sin dato</td><td>Sin dato</td></tr>`);
     } else {
         for (const i in porE) {
-            porEn.push(`<tr><td>${porE[i].nombre}</td><td>${porE[i].suma}</td></tr>`);
+            if (porE[i] == undefined || porE[i].suma == 0) {} else {
+                porEn.push(`<tr><td>${porE[i].nombre}</td><td>${porE[i].suma}</td></tr>`);
+            }
+
         }
     }
     if (top[0].dato == 0) {
         top5.push(`<tr><td>Sin dato</td><td>Sin dato</td></tr>`);
     } else {
         for (const i in top) {
-            top5.push(`<tr><td>${top[i].nombre}</td><td>${top[i].dato}</td></tr>`);
+            if (top[i] == undefined || top[i].dato == 0) {} else {
+                top5.push(`<tr><td>${top[i].nombre}</td><td>${top[i].dato}</td></tr>`);
+            }
+
         }
     }
     if (porD == false) {
         porDe.push(`<tr><td>Sin dato</td><td>Sin dato</td></tr>`);
     } else {
         for (const i in porD) {
-            porDe.push(`<tr><td>${porD[i].nombre}</td><td>${porD[i].suma}</td></tr>`);
+            if (porD[i] == undefined || porD[i].suma == 0) {} else {
+                porDe.push(`<tr><td>${porD[i].nombre}</td><td>${porD[i].suma}</td></tr>`);
+            }
+
         }
     }
 
