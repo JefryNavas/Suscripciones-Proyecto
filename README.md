@@ -35,8 +35,15 @@ Instalar el repositorio npm en tu proyecto
 ```
 npm init
 ```
+Comandos para poder instalar las dependencias del proyecto.
+```
+npm install csvtojson yargs colors --save
+```
+<img src="/img_readme/package.png" alt="My cool logo"/>
 
-_Finaliza con un ejemplo de cómo obtener datos del sistema o como usarlos para una pequeña demo_
+Dataset de Suscripciones de telefonía celular móvil https://datos.bancomundial.org/indicador/IT.CEL.SETS
+
+
 
 ## Ejecutando las pruebas ⚙️
 
