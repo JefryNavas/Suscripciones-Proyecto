@@ -25,18 +25,15 @@ csvtojson (libreria para leer un archivo csv)
 
 ### Instalación 🔧
 
-_Una serie de ejemplos paso a paso que te dice lo que debes ejecutar para tener un entorno de desarrollo ejecutandose_
+Primero debemos instalar el IDE de desarrollo Visual Studio Code
+link de descarga: https://code.visualstudio.com/download
 
-_Dí cómo será ese paso_
+Segundo instalar el lenguaje de programación Node js
+https://nodejs.org/es/download/
 
+Instalar el repositorio npm en tu proyecto
 ```
-Da un ejemplo
-```
-
-_Y repite_
-
-```
-hasta finalizar
+npm init
 ```
 
 _Finaliza con un ejemplo de cómo obtener datos del sistema o como usarlos para una pequeña demo_
