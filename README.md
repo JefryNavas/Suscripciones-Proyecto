@@ -39,7 +39,7 @@ Comandos para poder instalar las dependencias del proyecto.
 ```
 npm install csvtojson yargs colors --save
 ```
-<img src="/img_readme/package.png" alt="My cool logo"/>
+<img src="/img_readme/package.PNG"/>
 
 Dataset de Suscripciones de telefonía celular móvil https://datos.bancomundial.org/indicador/IT.CEL.SETS
 
