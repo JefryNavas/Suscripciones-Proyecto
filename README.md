@@ -60,6 +60,9 @@ Ejemplo:
 node app.js publicar -f "C:\Users\Jeffry\Desktop\Nueva carpeta (2)\datos.csv" -c ECU -y 2018
 ```
 Ejecución por Consola:
+```
+
+```
 <img src="/img_readme/por_consola.PNG"/>
 
 
@@ -98,8 +101,6 @@ Para todas las versiones disponibles, mira los [tags en este repositorio](https:
 ## Autores ✒️
 
 * **Jefry Navas** (https://github.com/JefryNavas)
-
-También puedes mirar la lista de todos los [contribuyentes](https://github.com/your/project/contributors) quíenes han participado en este proyecto. 
 
 ## Licencia 📄
 
