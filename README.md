@@ -31,13 +31,9 @@ link de descarga: https://code.visualstudio.com/download
 Segundo instalar el lenguaje de programación Node js
 https://nodejs.org/es/download/
 
-Instalar el repositorio npm en tu proyecto
-```
-npm init
-```
 Comandos para poder instalar las dependencias del proyecto.
 ```
-npm install csvtojson yargs colors --save
+npm install csvtojson yargs colors csv-parser --save
 ```
 <img src="/img_readme/package.PNG"/>
 
